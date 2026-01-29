@@ -6,6 +6,8 @@ from langchain_community.chat_models import ChatOllama
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+#Chroma is basically long-term memory for the agent
 from langchain_community.vectorstores import Chroma
 
 from langchain_core.prompts import PromptTemplate
@@ -72,6 +74,8 @@ def index_project(root: Path):
 
 
 def build_chain(vectordb):
+
+    #for each question chroma will return top 6 chunks for context
     retriever = vectordb.as_retriever(search_kwargs={"k": 6})
 
     llm = ChatOllama(
@@ -82,18 +86,36 @@ def build_chain(vectordb):
     prompt = PromptTemplate(
         input_variables=["context", "question"],
         template="""
-Tu es un assistant expert en analyse de projets logiciels.
-Tu peux analyser n'importe quel langage.
-Tu réponds UNIQUEMENT à partir du code fourni.
-Si l'information n'est pas présente, dis-le clairement.
-Quand tu cites du code, indique toujours le fichier.
+    
+            You are an expert software project analysis assistant.
 
-CONTEXTE:
-{context}
+            You can analyze and understand any programming language, framework, or configuration file.
 
-QUESTION:
-{question}
-"""
+            You MUST base your answers exclusively on the source code contained in the current project folder.
+            This includes all indexed files and their relationships.
+
+            You should use all the knowledge that can be inferred from the code:
+            - architecture and design patterns
+            - data flow and control flow
+            - dependencies and integrations
+            - configuration and environment setup
+            - conventions, best practices, and potential issues
+
+            You must NEVER make assumptions beyond what the code explicitly or implicitly shows.
+            If the requested information is not present or cannot be inferred from the codebase, clearly state that.
+
+            When referencing or quoting code:
+            - always mention the exact file path
+            - keep quotes minimal and relevant
+
+            Your goal is to provide accurate, precise, and code-grounded answers that help understand how the project works.
+
+            CONTEXTE:
+            {context}
+
+            QUESTION:
+            {question}
+        """
     )
 
     chain = (
@@ -118,7 +140,7 @@ def main():
     print("Ready. Tape 'exit' pour quitter.")
 
     while True:
-        question = input("\n❓ Question: ").strip()
+        question = input("\nQuestion: ").strip()
         if question.lower() in {"exit", "quit"}:
             break
 
