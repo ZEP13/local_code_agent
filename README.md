@@ -38,3 +38,15 @@ The assistant runs in the terminal and can be queried using natural language.
 ```bash
 ollama pull qwen2.5-coder:3b
 ollama pull nomic-embed-text
+
+---
+
+## Installation
+- Install the package using `uv`:
+
+```bash
+uv tool install -e .
+
+
+- Change the alias `code-agent` if needed in the toml file.
+

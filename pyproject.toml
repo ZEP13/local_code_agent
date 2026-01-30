@@ -9,3 +9,9 @@ dependencies = [
     "langchain-community>=0.0.38,<0.1.0",
     "langchain-text-splitters>=0.0.1",
 ]
+
+
+# Change "code-agent" to the alias you want
+# Run: uv tool install -e . to create a local app
+[project.scripts]
+code-agent = "main:main"
